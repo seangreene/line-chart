@@ -1,10 +1,10 @@
-<!-- shamelessly stolen from scott murray: http://alignedleft.com/tutorials -->
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Line Chart</title>
-
+<html>
+<head>
+		<meta charset="utf-8">
+	    <title>Line Chart</title>
+		<script src="http://d3js.org/d3.v3.min.js" type="text/javascript" charset="utf-8"></script>
+        
 		<style type="text/css">
 		
 			svg {
@@ -38,21 +38,19 @@
 			.axis path {
 				display: none;
 			}
-			.yAxis text {
+			.y.axis text {
 				fill: #999;
 			}
-			.yAxis .minor line {
+			.y.axis .minor line {
 				stroke: #ccc;
 				stroke-dasharray: 2,4;
 			}
-			.xAxis .minor text{
+			.x.axis .minor text{
 				display: none;
 			}
 
 		</style>
 		
-        <script src="http://d3js.org/d3.v3.min.js" type="text/javascript" charset="utf-8"></script>
-
     </head>
     <body>
 		<h1>Strikeouts on the Rise</h1>
@@ -60,45 +58,12 @@
 		<div class="chart"></div>
 
 		<script type="text/javascript">
-		
-		var	margin = {top: 20, right: 20, bottom: 20, left: 20};
-		
-		var	width = 750 - margin.left - margin.right,
-		    height = 500 - margin.top - margin.bottom;
-		
-		var svg = d3.select("chart").append("svg")
-			.attr("width", width + margin.left + margin.right)
-		  .append("g")
-			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");	
-		
-		var xScale = d3.scale.linear()
-			.domain([1900, 2012])
-			.range( [0, width]);
-			
-		var yScale = d3.scale.linear()
-			.range([height, 0]);
-		
-		var xAxis = d3.svg.axis()
-			.scale(xScale)
-			.orient("bottom")
-			.tickFormat(function(d) { return d; });
-		
-		var margin = 715;
-		var yAxis = d3.svg.axis()
-		    .scale(yScale)
-		    .orient("right")
-			.tickFormat(function(d) {return d;})
-			.ticks(10)
-			.tickPadding(10)
-		    .tickSize(-width - margin.left - margin.right);		
-		
-		
-		
-		
-		
-		
-		
 		d3.csv("strikeouts.csv", function(data){
+
+			var margin = {top: 20, right: 20, bottom: 20, left: 20};
+			    width = 750 - margin.left - margin.right,
+			    height = 500 - margin.top - margin.bottom;
+
 			
 			data.forEach(function(d) {
 		        d.so = +d.so;
@@ -107,69 +72,68 @@
 		        //We also want to calculate the strikeouts per game and store it as a new column
 		        d.kpg = d.so / d.g;
 		    });
-		
-		  	yScale.domain([0, d3.max(data, function(d) {return d.kpg; })]);
-		
+
+		    //console.log(data);
 			
-			var oakData = data.filter(function(d) { return d.franchise === "OAK"; });
+			var seattleData = data.filter(function(d) { return d.franchise === "SEA"; });
 
-
-			/*
+			var svg = d3.select(".chart").append("svg")
+			    .attr("width", width + margin.left + margin.right)
+			    .attr("height", height + margin.top + margin.bottom)
+			  .append("g")
+			    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 			var xScale = d3.scale.linear()
 			    .domain([1900, 2012])
 			    .range([0, width]);
 			var yScale = d3.scale.linear()
 				.domain([0, d3.max(data, function(d) { return d.kpg; })])
 			    .range([height, 0]);
-			*/
-			
-			//creates line
-			var line = d3.svg.line()
-			    .x(function(d) { return xScale(d.year); })
-			    .y(function(d) { return yScale(d.kpg); });
-			
-			
-				svg.append("g")
-					.attr("class", "xAxis")
-					.attr("transform", "translate(0, " + height + ")")
-					.call(xAxis);
-					
-				
-				svg.append("g")
-					.attr("class", "yAxis")
-					.attr("transform", "translate(" + margin + ",0)")
-					.call(yAxis)
-					.selectAll("g")
-				    .classed("minor", function(d,i) { return i !== 0; });
-					
-					
-			
+	
 			//creates plot
 			svg.selectAll(".dot")
-				.data(oakData)
+				.data(seattleData)
 			.enter().append("circle")
 				.attr("class", "dot")
 				.attr("r", 2)
 				.attr("cx", function(d, i) { return xScale(d.year); })
 				.attr("cy", function(d) { return yScale(d.kpg); })
 
-
+			//creates line
+			var line = d3.svg.line()
+			    .x(function(d) { return xScale(d.year); })
+			    .y(function(d) { return yScale(d.kpg); });
 			svg.append("path")
-	   		    .attr("d", line(oakData))
+	   		    .attr("d", line(seattleData))
 				.attr("class", "line");
 				
-
-			
-
-
+			var xAxis = d3.svg.axis()
+			    .scale(xScale)
+				.orient("bottom")
+				.tickFormat(function(d) { return d; })
+				.scale(xScale);
 				
-
+			svg.append("g")
+				.attr("class", "x-axis")
+				.attr("transform", "translate(0, " + height + ")")
+				.call(xAxis);
 			
-		});
+			var margin = 720;
+			var yAxis = d3.svg.axis()
+			    .scale(yScale)
+			    .orient("right")
+				.ticks(10)
+				.tickPadding(10)
+			    .tickSize(-width - margin.left - margin.right);
 			
-			
-		//blamo
-		d3.select(".chart").append("button").text("Blamo!").on("click", function() {
+			svg.append("g")
+				.attr("class", "y-axis")
+				.attr("transform", "translate(" + margin + ",0)")
+				.call(yAxis)
+				.selectAll("g")
+			    .classed("minor", function(d,i) { return i !== 0; });
+				
+			//blamo
+			d3.select(".chart").append("button").text("Blamo!").on("click", function() {
 			    d3.selectAll("circle")
 			        .transition()
 			     	.duration(2000)
@@ -177,7 +141,12 @@
 				    .delay(function(d, i){ return i * 50})
 				    .attr("cy", height)
 				    .attr("r", 7);
+			});
+			
 		});
+			
+			
+			
 			
 			
 			
