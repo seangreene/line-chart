@@ -6,23 +6,52 @@
         <title>Line Chart</title>
 
 		<style type="text/css">
+		
+			svg {
+				font-family: Helvetica;
+			}
+			
 			.domain {
 			    fill: none;
-			    stroke: cyan;
+			    stroke: black;
 			}
 			.tick line {
-			    stroke: cyan;
+			    stroke: black;
 			}
 			.tick {
 			    font-size: 10px;
 			}
 			.line {
 		    	fill: none;
-		    	stroke: magenta;
+		    	stroke: blue;
 		  	}
+			
+			.axis line {
+				fill: none;
+				stroke: #000;
+				shape-rendering: crispEdges;
+			}
+			.axis text {
+				font-size: 11px;
+				text-anchor: start !important;
+			}
+			.axis path {
+				display: none;
+			}
+			.y.axis text {
+				fill: #999;
+			}
+			.y.axis .minor line {
+				stroke: #ccc;
+				stroke-dasharray: 2,4;
+			}
+			.x.axis .minor text{
+				display: none;
+			}
+
 		</style>
 		
-        <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+        <script src="http://d3js.org/d3.v3.min.js" type="text/javascript" charset="utf-8"></script>
 
     </head>
     <body>
@@ -30,7 +59,7 @@
 		<p>Baseball. America's sport under fire from increasing strikeouts and merciless pitchers. Or just worse batters? Here is some data.</p>
 		<div class="chart"></div>
 
-		<script>
+		<script type="text/javascript">
 		d3.csv("strikeouts.csv", function(data){
 
 			var margin = {top: 20, right: 20, bottom: 20, left: 20};
@@ -47,6 +76,7 @@
 		    });
 
 		    //console.log(data);
+			
 			var oakData = data.filter(function(d) { return d.franchise === "OAK"; });
 
 			var svg = d3.select(".chart").append("svg")
@@ -60,7 +90,7 @@
 			var yScale = d3.scale.linear()
 				.domain([0, d3.max(data, function(d) { return d.kpg; })])
 			    .range([height, 0]);
-
+	
 			//creates plot
 			svg.selectAll(".dot")
 				.data(oakData)
@@ -80,13 +110,29 @@
 				
 			var xAxis = d3.svg.axis()
 			    .scale(xScale)
+				.orient("bottom")
 				.tickFormat(function(d) { return d; })
 				.scale(xScale);
 				
 			svg.append("g")
-				.attr("class", "axis")
+				.attr("class", "x-axis")
 				.attr("transform", "translate(0, " + height + ")")
 				.call(xAxis);
+			
+			var margin = 710;
+			var yAxis = d3.svg.axis()
+			    .scale(yScale)
+			    .orient("right")
+				.ticks(10)
+				.tickPadding(10)
+			    .tickSize(-width - margin.left - margin.right);
+			
+			svg.append("g")
+				.attr("class", "y-axis")
+				.attr("transform", "translate(" + margin + ",0)")
+				.call(yAxis)
+				.selectAll("g")
+			    .classed("minor", function(d,i) { return i !== 0; });
 				
 			//blamo
 			d3.select(".chart").append("button").text("Blamo!").on("click", function() {
