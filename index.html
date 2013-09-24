@@ -25,7 +25,10 @@
 		    	fill: none;
 		    	stroke: blue;
 		  	}
-			
+			.dot {
+				fill: blue;
+				stroke: blue;
+			}
 			.axis line {
 				fill: none;
 				stroke: #000;
@@ -47,6 +50,15 @@
 			}
 			.x.axis .minor text{
 				display: none;
+			}
+			.annotationline {
+				fill:none;
+				stroke: black;
+			}
+			.annotation {
+				font-family: helvetica;
+				font-size: 11px;
+				text-align: center;
 			}
 
 		</style>
@@ -73,7 +85,6 @@
 		        d.kpg = d.so / d.g;
 		    });
 
-		    //console.log(data);
 			
 			var seattleData = data.filter(function(d) { return d.franchise === "SEA"; });
 
@@ -131,17 +142,46 @@
 				.call(yAxis)
 				.selectAll("g")
 			    .classed("minor", function(d,i) { return i !== 0; });
+			
+			
+			svg.append("line")
+				.attr("class", "annotationline")
+				.attr("x1", xScale(1986))
+				.attr("y1", yScale(8))
+				.attr("x2", xScale(1986))
+				.attr("y2", yScale(7.2));
+			
+			svg.selectAll(".annotation")
+			      .data([
+					"Wikipedia did not explain",
+					"what happened here.",
+					])
+				.enter().append("text")
+				.classed("annotation", true)
+				.attr("x", xScale(1977))
+				.attr("y", yScale(8.5))
+				.attr("dy", function(d, i) { return i * 1.3 + "em"; })
+				.text(function(d) { return d; });
+						
+			svg.append("line")
+				.attr("class", "annotationline")
+				.attr("x1", xScale(2007))
+				.attr("y1", yScale(5))
+				.attr("x2", xScale(2007))
+				.attr("y2", yScale(3));
 				
-			//blamo
-			d3.select(".chart").append("button").text("Blamo!").on("click", function() {
-			    d3.selectAll("circle")
-			        .transition()
-			     	.duration(2000)
-				    .ease("bounce")
-				    .delay(function(d, i){ return i * 50})
-				    .attr("cy", height)
-				    .attr("r", 7);
-			});
+			svg.selectAll(".annotation")
+			      .data([
+			        "Mariners go on eight-",
+					"game winning streak.",
+			      ])
+			   	.enter().append("text")
+			    .classed("annotation", true)
+			    .attr("x", xScale(1995))
+			    .attr("y", yScale(2.7))
+			    .attr("dy", function(d, i) { return i * 1.3 + "em"; })
+			    .text(function(d) { return d; });
+
 			
 		});
 			
